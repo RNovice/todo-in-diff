@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Vanilla</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="main">
+    <div class="card">
+      <h1>Todo List</h1>
+      <div class="filter-buttons">
+        <button data-filter="" class="active">All</button>
+        <button data-filter="pending">Pending</button>
+        <button data-filter="done">Done</button>
+      </div>
+      <form id="todo-form">
+        <input id="user-input" /><button id="add-btn" type="submit">Add</button>
+      </form>
+      <ul id="todo-list"></ul>
+    </div>
+    <script type="module">
+      import { getTodos, saveTodos, uuid } from "./utils.js";
+      const $ = (s) => document.querySelector(s),
+        $$ = (s) => document.querySelectorAll(s),
+        userInput = $("#user-input"),
+        todoList = $("#todo-list"),
+        tasks = getTodos();
+      let filter = "";
+      const update = (fn) => (fn?.(), saveTodos(tasks), render()),
+        render = () =>
+          (todoList.innerHTML = (
+            filter
+              ? tasks.filter((t) => t.isCompleted === (filter === "done"))
+              : tasks
+          )
+            .map(
+              (t) => `<li class="${t.isCompleted ? "done" : ""}" data-id="${
+                t.id
+              }">
+                <span class="todo-content">
+                  <span class="todo-name">${t.name}</span>
+                  <button class="remove-btn" title="delete">X</button>
+                </span>
+              </li>`
+            )
+            .join(""));
+
+      $("#todo-form").addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = userInput.value.trim();
+        if (name)
+          update(() => tasks.push({ id: uuid(), name, isCompleted: false }));
+        userInput.value = "";
+      });
+      todoList.addEventListener("click", (e) => {
+        const id = e.target.closest("li")?.dataset.id;
+        update(() =>
+          e.target.classList.contains("remove-btn")
+            ? tasks.splice(
+                tasks.findIndex((t) => t.id === id),
+                1
+              )
+            : ((t) => (t.isCompleted = !t.isCompleted))(
+                tasks.find((t) => t.id === id)
+              )
+        );
+      });
+      $(".filter-buttons").addEventListener("click", (e) => {
+        if (e.target.tagName !== "BUTTON") return;
+        $$(".filter-buttons button").forEach((b) =>
+          b.classList.remove("active")
+        );
+        e.target.classList.add("active");
+        filter = e.target.dataset.filter;
+        render();
+      });
+      render();
+    </script>
+  </body>
+</html>

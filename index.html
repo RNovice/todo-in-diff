@@ -1,9 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8" />
     <title>Todo in Diff</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
-  <body></body>
+  <body class="body">
+    <nav>
+      <h1>Todo in</h1>
+      <select id="select">
+        <option value="vanilla.html">Vanilla</option>
+      </select>
+    </nav>
+    <iframe id="preview" src="vanilla.html"></iframe>
+    <script>
+      const iframe = document.getElementById("preview");
+      document.getElementById("select").onchange = (e) =>
+        (iframe.src = e.target.value);
+    </script>
+  </body>
 </html>
