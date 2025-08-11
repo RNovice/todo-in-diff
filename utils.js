@@ -1,6 +1,6 @@
 export const getTodos = () => {
   const todos = localStorage.getItem('todos');
-  return todos ? JSON.parse(todos) : [];
+  return todos ? JSON.parse(todos) : [{ id: uuid(), name: "Build Todo List", isCompleted: false }];
 }
 
 export const saveTodos = (todos) => {

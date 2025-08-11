@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React 18</title>
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  </head>
+  <body class="main">
+    <div id="root" class="card"></div>
+  </body>
+  <script type="module">
+    import { getTodos, saveTodos, uuid } from "./utils.js";
+    Object.assign(window, { getTodos, saveTodos, uuid });
+  </script>
+  <script type="text/babel">
+    function App() {
+      const { useState, useEffect } = React,
+        { getTodos, saveTodos, uuid } = window;
+      const [tasks, setTasks] = useState(getTodos()),
+        [filter, setFilter] = useState("");
+      useEffect(() => saveTodos(tasks), [tasks]);
+      return (
+        <>
+          <h1>Todo List</h1>
+          <div className="filter-buttons">
+            {["", "pending", "done"].map((f) => (
+              <button
+                key={f}
+                className={filter === f ? "active" : undefined}
+                onClick={() => setFilter(f)}
+              >
+                {f || "All"}
+              </button>
+            ))}
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const name = e.target["user-input"].value.trim();
+              if (name)
+                setTasks([...tasks, { id: uuid(), name, isCompleted: false }]);
+              e.target.reset();
+            }}
+          >
+            <input id="user-input" />
+            <button id="add-btn" type="submit">
+              Add
+            </button>
+          </form>
+          <ul
+            id="todo-list"
+            onClick={(e) => {
+              const id = e.target.closest("li")?.id;
+              if (!id) return;
+              setTasks((tasks) =>
+                e.target.classList.contains("remove-btn")
+                  ? tasks.filter((t) => t.id !== id)
+                  : tasks.map((t) =>
+                      t.id === id ? { ...t, isCompleted: !t.isCompleted } : t
+                    )
+              );
+            }}
+          >
+            {(filter
+              ? tasks.filter((t) => t.isCompleted === (filter === "done"))
+              : tasks
+            ).map((t) => (
+              <li key={t.id} id={t.id} className={t.isCompleted ? "done" : ""}>
+                <span className="todo-content">
+                  <span className="todo-name">{t.name}</span>
+                  <button className="remove-btn" title="delete">
+                    X
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      );
+    }
+    ReactDOM.createRoot(document.getElementById("root")).render(
+      <React.StrictMode>
+        <App />
+      </React.StrictMode>
+    );
+  </script>
+</html>
