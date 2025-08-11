@@ -163,7 +163,7 @@ select {
 
 #todo-list {
   padding: 0 24px;
-  margin-block: 12px;
+  margin-block: 16px;
   text-align: left;
   overflow-y: auto;
 }
