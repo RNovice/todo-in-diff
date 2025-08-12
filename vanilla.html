@@ -54,6 +54,7 @@
       });
       todoList.addEventListener("click", (e) => {
         const id = e.target.closest("li")?.dataset.id;
+        if (!id) return;
         update(() =>
           e.target.classList.contains("remove-btn")
             ? tasks.splice(
