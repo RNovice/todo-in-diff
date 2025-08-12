@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue 3</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body class="main">
+    <div id="app" class="card">
+      <h1>Todo List</h1>
+      <div class="filter-buttons">
+        <button :class="filter===''?'active':''" @click="filter=''">All</button>
+        <button
+          :class="filter==='pending'?'active':''"
+          @click="filter='pending'"
+        >
+          Pending
+        </button>
+        <button :class="filter==='done'?'active':''" @click="filter='done'">
+          Done
+        </button>
+      </div>
+      <form id="todo-form" @submit="addTask">
+        <input v-model.trim="input" id="user-input" /><button
+          id="add-btn"
+          type="submit"
+        >
+          Add
+        </button>
+      </form>
+      <ul id="todo-list" @click="taskAction">
+        <li
+          v-for="t in filtered"
+          :key="t.id"
+          :id="t.id"
+          :class="t.isCompleted ? 'done' : ''"
+        >
+          <span class="todo-content">
+            <span class="todo-name">{{t.name}}</span>
+            <button class="remove-btn" title="delete">X</button>
+          </span>
+        </li>
+      </ul>
+    </div>
+  </body>
+  <script type="module">
+    import { getTodos, saveTodos, uuid } from "./utils.js";
+    import {
+      createApp,
+      ref,
+      computed,
+    } from "https://unpkg.com/vue@3/dist/vue.esm-browser.js";
+
+    createApp({
+      setup() {
+        const tasks = ref(getTodos()),
+          filter = ref(""),
+          input = ref("");
+        const filtered = computed(() =>
+          filter.value
+            ? tasks.value.filter(
+                (t) => t.isCompleted === (filter.value === "done")
+              )
+            : tasks.value
+        );
+        const addTask = (e) => {
+          e.preventDefault();
+          if (input.value) {
+            tasks.value.push({
+              id: uuid(),
+              name: input.value,
+              isCompleted: false,
+            });
+            input.value = "";
+            saveTodos(tasks.value);
+          }
+        };
+        const taskAction = (e) => {
+          const id = e.target.closest("li")?.id;
+          if (!id) return;
+          if (e.target.classList.contains("remove-btn")) {
+            tasks.value = tasks.value.filter((t) => t.id !== id);
+          } else {
+            const task = tasks.value.find((t) => t.id === id);
+            task.isCompleted = !task.isCompleted;
+          }
+          saveTodos(tasks.value);
+        };
+        return {
+          filtered,
+          filter,
+          input,
+          addTask,
+          taskAction,
+        };
+      },
+    }).mount("#app");
+  </script>
+</html>
